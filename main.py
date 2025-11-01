@@ -40,6 +40,7 @@ def draw_art(n_angles, codes, colors):
     # Validate inputs
     if not codes or not all(
         code is None or
+        code == "" or
         code.isdigit()
         # and len(set(c)) == len(c)
         and all(int(d) >= 1 for d in code) for code in codes
@@ -60,7 +61,7 @@ def draw_art(n_angles, codes, colors):
         color = colors[i_code]
         n_angle = n_angles[i_code]
 
-        if code is None:
+        if code is None or code == "":  # Empty string occurs due to queary params
             draw_point_cloud(ax, n_angle, [4], color)
             continue
 
@@ -95,41 +96,54 @@ def draw_art(n_angles, codes, colors):
 
 st.set_page_config(layout="wide")
 col1, col2 = st.columns([4, 5])  # Allocate more space to col2 (graph)
+if not st.query_params:
+    st.query_params.from_dict({
+        "ck1": "True", "ang1": "8", "code1": "52413", "cl1": "#FF0000",
+        "ck2": "False", "ang2": "8", "code2": "", "cl2": "#00FF00",
+        "ck3": "False", "ang3": "8", "code3": "", "cl3": "#0000FF"
+    })
 
 # Streamlit Dashboard
 with col1:
     # First row
     row1 = st.columns(4)
     with row1[0]:
-        checkbox1 = st.checkbox("Enable", label_visibility="hidden", value=True, key="ck1")
+        checkbox1 = st.checkbox("Enable", label_visibility="hidden", value=st.query_params["ck1"]=="True", key="ck1")
     with row1[1]:
-        n_angles1 = st.number_input("N Angles", min_value=2, value=8, step=1, key="ag1")
+        n_angles1 = st.number_input("N Angles", min_value=2, value=int(st.query_params["ang1"]), step=1, key="ang1")
     with row1[2]:
-        code1 = st.text_input("code", value="52413", key="co1")
+        code1 = st.text_input("code", value=st.query_params["code1"], key="code1")
     with row1[3]:
-        color1 = st.color_picker("Color", value="#FF0000", key="cl1")
+        color1 = st.color_picker("Color", value=st.query_params["cl1"], key="cl1")
 
     # Second row
     row2 = st.columns(4)
     with row2[0]:
-        checkbox2 = st.checkbox("Enable", label_visibility="hidden", key="ck2")
+        checkbox2 = st.checkbox("Enable", label_visibility="hidden", value=st.query_params["ck2"]=="True", key="ck2")
     with row2[1]:
-        n_angles2 = st.number_input("N Angles", min_value=2, value=8, step=1, key="ag2")
+        n_angles2 = st.number_input("N Angles", min_value=2, value=int(st.query_params["ang2"]), step=1, key="ang2")
     with row2[2]:
-        code2 = st.text_input("code", value=None, key="co2")
+        code2 = st.text_input("code", value=st.query_params["code2"], key="code2")
     with row2[3]:
-        color2 = st.color_picker("Color", value="#00FF00", key="cl2")
+        color2 = st.color_picker("Color", value=st.query_params["cl2"], key="cl2")
 
     # Third row
     row3 = st.columns(4)
     with row3[0]:
-        checkbox3 = st.checkbox("Enable", label_visibility="hidden", key="ck3")
+        checkbox3 = st.checkbox("Enable", label_visibility="hidden", value=st.query_params["ck3"]=="True", key="ck3")
     with row3[1]:
-        n_angles3 = st.number_input("N Angles", min_value=2, value=8, step=1, key="ag3")
+        n_angles3 = st.number_input("N Angles", min_value=2, value=int(st.query_params["ang3"]), step=1, key="ang3")
     with row3[2]:
-        code3 = st.text_input("code", value=None, key="co3")
+        code3 = st.text_input("code", value=st.query_params["code3"], key="code3")
     with row3[3]:
-        color3 = st.color_picker("Color", value="#0000FF", key="cl3")
+        color3 = st.color_picker("Color", value=st.query_params["cl3"], key="cl3")
+
+# Set parameters that are configured:
+st.query_params.from_dict({
+    "ck1": str(checkbox1), "ang1": str(n_angles1), "code1": code1, "cl1": color1,
+    "ck2": str(checkbox2), "ang2": str(n_angles2), "code2": code2, "cl2": color2,
+    "ck3": str(checkbox3), "ang3": str(n_angles3), "code3": code3, "cl3": color3
+})
 
 # Prepare the input data
 codes = [code for chk, code in [(checkbox1, code1), (checkbox2, code2), (checkbox3, code3)] if chk]
